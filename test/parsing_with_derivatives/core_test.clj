@@ -26,7 +26,7 @@
     (t/is (= (sut/empty-pattern) (sut/normalize (sut/empty-pattern)))))
 
   (t/testing "pattern->regex"
-    (t/is (= #"" (sut/pattern->regex (sut/empty-pattern))))))
+    (t/is (= "" (str (sut/pattern->regex (sut/empty-pattern)))))))
 
 (t/deftest any-character-pattern-test
   (t/testing "match-one"
@@ -39,7 +39,7 @@
     (t/is (= (sut/any-character-pattern) (sut/normalize (sut/any-character-pattern)))))
 
   (t/testing "pattern->regex"
-    (t/is (= #"." (sut/pattern->regex (sut/any-character-pattern))))))
+    (t/is (= "." (str (sut/pattern->regex (sut/any-character-pattern)))))))
 
 (t/deftest character-pattern-test
   (t/testing "match-one"
@@ -53,7 +53,7 @@
     (t/is (= (sut/character-pattern \a) (sut/normalize (sut/character-pattern \a)))))
 
   (t/testing "pattern->regex"
-    (t/is (= #"." (sut/pattern->regex (sut/any-character-pattern))))))
+    (t/is (= "a" (str (sut/pattern->regex (sut/character-pattern \a)))))))
 
 (t/deftest alternation-pattern-test
   (t/testing "match-one"
@@ -121,24 +121,24 @@
           "Branches of an alternation can be pruned if they've exactly shown up before")
     (t/is (= (sut/sequence-pattern
               (sut/character-pattern \a)
-              (sut/alternation-pattern (sut/sequence-pattern (sut/character \b) (sut/character \c))
-                                       (sut/sequence-pattern (sut/character \d) (sut/character \e))
-                                       (sut/sequence-pattern (sut/character \f) (sut/character \g))
-                                       (sut/sequence-pattern (sut/character \h) (sut/character \i))
-                                       (sut/sequence-pattern (sut/character \j) (sut/character \k))))
+              (sut/alternation-pattern (sut/sequence-pattern (sut/character-pattern \b) (sut/character-pattern \c))
+                                       (sut/sequence-pattern (sut/character-pattern \d) (sut/character-pattern \e))
+                                       (sut/sequence-pattern (sut/character-pattern \f) (sut/character-pattern \g))
+                                       (sut/sequence-pattern (sut/character-pattern \h) (sut/character-pattern \i))
+                                       (sut/sequence-pattern (sut/character-pattern \j) (sut/character-pattern \k))))
              (sut/alternation-pattern
               (sut/character-pattern \a)
               (sut/sequence-pattern
                (sut/character-pattern \a)
                (sut/alternation-pattern (sut/alternation-pattern)
-                                        (sut/alternation-pattern (sut/sequence-pattern (sut/character \b)
-                                                                                       (sut/character \c))
-                                                                 (sut/sequence-pattern (sut/character \d)
-                                                                                       (sut/character \e)))
-                                        (sut/alternation-pattern (sut/sequence-pattern (sut/character \f)
-                                                                                       (sut/character \g))
-                                                                 (sut/sequence-pattern (sut/character \h)
-                                                                                       (sut/character \i)))))
+                                        (sut/alternation-pattern (sut/sequence-pattern (sut/character-pattern \b)
+                                                                                       (sut/character-pattern \c))
+                                                                 (sut/sequence-pattern (sut/character-pattern \d)
+                                                                                       (sut/character-pattern \e)))
+                                        (sut/alternation-pattern (sut/sequence-pattern (sut/character-pattern \f)
+                                                                                       (sut/character-pattern \g))
+                                                                 (sut/sequence-pattern (sut/character-pattern \h)
+                                                                                       (sut/character-pattern \i)))))
               (sut/alternation-pattern (sut/sequence-pattern (sut/character-pattern \a)
                                                              (sut/character-pattern \b)
                                                              (sut/character-pattern \c))
@@ -190,14 +190,14 @@
             "Negated character set A in alternation with character set B is the same as A with B removed")))
 
   (t/testing "pattern->regex"
-    (t/is (= #"a|b|c" (sut/pattern->regex (sut/alternation-pattern (sut/character-set-pattern \a)
-                                                                   (sut/character-set-pattern \b)
-                                                                   (sut/character-set-pattern \c)))))
-    (t/is (= #"(?:a|b|c)d"
-             (sut/pattern->regex (sut/sequence-pattern (sut/alternation-pattern (sut/character-set-pattern \a)
-                                                                                (sut/character-set-pattern \b)
-                                                                                (sut/character-set-pattern \c))
-                                                       (sut/character-set-pattern \d)))))))
+    (t/is (= "a|b|c" (str (sut/pattern->regex (sut/alternation-pattern (sut/character-set-pattern \a)
+                                                                       (sut/character-set-pattern \b)
+                                                                       (sut/character-set-pattern \c))))))
+    (t/is (= "(?:a|b|c)d"
+             (str (sut/pattern->regex (sut/sequence-pattern (sut/alternation-pattern (sut/character-set-pattern \a)
+                                                                                     (sut/character-set-pattern \b)
+                                                                                     (sut/character-set-pattern \c))
+                                                            (sut/character-set-pattern \d))))))))
 
 (t/deftest sequence-pattern-test
   (t/testing "match-one"
@@ -260,13 +260,13 @@
                                                                         (sut/character-pattern \c)))))))
 
   (t/testing "pattern->regex"
-    (t/is (= #"abc" (sut/sequence-pattern (sut/character-pattern \a)
-                                          (sut/character-pattern \b)
-                                          (sut/character-pattern \c))))
-    (t/is (= #"(?:abc)|d" (sut/alternation-pattern (sut/sequence-pattern (sut/character-pattern \a)
-                                                                         (sut/character-pattern \b)
-                                                                         (sut/character-pattern \c))
-                                                   (sut/character-pattern \d))))
+    (t/is (= "abc" (str (sut/sequence-pattern (sut/character-pattern \a)
+                                              (sut/character-pattern \b)
+                                              (sut/character-pattern \c)))))
+    (t/is (= "(?:abc)|d" (str (sut/alternation-pattern (sut/sequence-pattern (sut/character-pattern \a)
+                                                                             (sut/character-pattern \b)
+                                                                             (sut/character-pattern \c))
+                                               (sut/character-pattern \d)))))
 
     (t/testing "repetition-pattern"
       (t/is (= (sut/repetition-pattern (sut/character-set-pattern \a))
@@ -301,8 +301,8 @@
     (t/is (= (sut/character-set-pattern \a) (sut/normalize (sut/character-set-pattern \a)))))
 
   (t/testing "pattern->regex"
-    (t/is (= #"a" (sut/pattern->regex (sut/character-set-pattern \a))))
-    (t/is (= #"[a-b]" (sut/pattern->regex (sut/character-set-pattern \a \b))))))
+    (t/is (= "a" (str (sut/pattern->regex (sut/character-set-pattern \a)))))
+    (t/is (= "[a-b]" (str (sut/pattern->regex (sut/character-set-pattern \a \b)))))))
 
 (t/deftest negated-character-set-pattern-test
   (t/testing "constructor"
@@ -327,8 +327,8 @@
     (t/is (= (sut/negated-character-set-pattern \a) (sut/normalize (sut/negated-character-set-pattern \a)))))
 
   (t/testing "pattern->regex"
-    (t/is (= #"[^a]" (sut/pattern->regex (sut/negated-character-set-pattern \a))))
-    (t/is (= #"[^a-b]" (sut/pattern->regex (sut/negated-character-set-pattern \a \b))))))
+    (t/is (= "[^a]" (str (sut/pattern->regex (sut/negated-character-set-pattern \a)))))
+    (t/is (= "[^a-b]" (str (sut/pattern->regex (sut/negated-character-set-pattern \a \b)))))))
 
 (t/deftest repetition-pattern-test
   (t/testing "match-one"
@@ -352,7 +352,8 @@
           "#\"(?:a*)*\" => #\"a*\""))
 
   (t/testing "pattern->regex"
-    (t/is (= #"a*" (sut/pattern->regex (sut/repetition-pattern (sut/character-set-pattern \a)))))
-    (t/is (= #"(?:ab)*"
-             (sut/pattern->regex (sut/repetition-pattern (sut/sequence-pattern (sut/character-set-pattern \a)
-                                                                               (sut/character-set-pattern \b))))))))
+    (t/is (= "a*" (str (sut/pattern->regex (sut/repetition-pattern (sut/character-set-pattern \a))))))
+    (t/is (=
+           "(?:ab)*"
+           (str (sut/pattern->regex (sut/repetition-pattern (sut/sequence-pattern (sut/character-set-pattern \a)
+                                                                                  (sut/character-set-pattern \b)))))))))
